@@ -3,13 +3,18 @@
 import React from "react";
 import { useState, type SyntheticEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useT } from "next-i18next/client";
+import { localePrefixFromPathname } from "@/lib/locale-path";
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
 export function RegisterForm() {
+  const { t } = useT("connexion");
   const router = useRouter();
+  const pathname = usePathname();
+  const prefix = localePrefixFromPathname(pathname);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,17 +37,17 @@ export function RegisterForm() {
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Registration failed");
+        setMessage(data.error ?? t("registerForm.errorRegister"));
         return;
       }
 
       setStatus("success");
-      setMessage(data.message ?? "Account created successfully");
+      setMessage(data.message ?? t("registerForm.successRegister"));
       // After a successful registration, take the user to the login page.
-      router.replace("/login");
+      router.replace(`${prefix}/login`);
     } catch {
       setStatus("error");
-      setMessage("Network error. Please try again.");
+      setMessage(t("errors.network"));
     }
   }
 
@@ -54,7 +59,7 @@ export function RegisterForm() {
     >
       <div>
         <label htmlFor="register-name" className="block text-sm font-medium text-white mb-1">
-          Name
+          {t("registerForm.nameLabel")}
         </label>
         <input
           id="register-name"
@@ -62,7 +67,7 @@ export function RegisterForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className={inputBase}
-          placeholder="Your name"
+          placeholder={t("registerForm.namePlaceholder")}
           required
           autoComplete="name"
           disabled={status === "loading"}
@@ -70,7 +75,7 @@ export function RegisterForm() {
       </div>
       <div>
         <label htmlFor="register-email" className="block text-sm font-medium text-white mb-1">
-          Email
+          {t("registerForm.emailLabel")}
         </label>
         <input
           id="register-email"
@@ -78,7 +83,7 @@ export function RegisterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputBase}
-          placeholder="you@example.com"
+          placeholder={t("registerForm.emailPlaceholder")}
           required
           autoComplete="email"
           disabled={status === "loading"}
@@ -86,7 +91,7 @@ export function RegisterForm() {
       </div>
       <div>
         <label htmlFor="register-password" className="block text-sm font-medium text-white mb-1">
-          Password
+          {t("registerForm.passwordLabel")}
         </label>
         <input
           id="register-password"
@@ -94,7 +99,7 @@ export function RegisterForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className={inputBase}
-          placeholder="••••••••"
+          placeholder={t("registerForm.passwordPlaceholder")}
           required
           minLength={8}
           autoComplete="new-password"
@@ -116,13 +121,16 @@ export function RegisterForm() {
         disabled={status === "loading"}
         className="btn-common-styles btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {status === "loading" ? "Creating account…" : "Create account"}
+        {status === "loading" ? t("registerForm.submitting") : t("registerForm.submit")}
       </button>
 
       <p className="text-sm text-white/80">
-        Already have an account?{" "}
-        <Link href="/login" className="underline hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded">
-          Log in
+        {t("registerForm.haveAccount")}{" "}
+        <Link
+          href={`${prefix}/login`}
+          className="underline hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded"
+        >
+          {t("registerForm.loginLink")}
         </Link>
       </p>
     </form>

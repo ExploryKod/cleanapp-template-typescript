@@ -2,13 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useT } from "next-i18next/client";
+import { localePrefixFromPathname } from "@/lib/locale-path";
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
 export function LoginForm() {
+  const { t } = useT("connexion");
   const router = useRouter();
+  const pathname = usePathname();
+  const prefix = localePrefixFromPathname(pathname);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -30,16 +35,16 @@ export function LoginForm() {
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Login failed");
+        setMessage(data.error ?? t("loginForm.errorLogin"));
         return;
       }
 
       setStatus("success");
-      setMessage(data.message ?? "Logged in successfully");
-      router.replace("/");
+      setMessage(data.message ?? t("loginForm.successLogin"));
+      router.replace(prefix);
     } catch {
       setStatus("error");
-      setMessage("Network error. Please try again.");
+      setMessage(t("errors.network"));
     }
   }
 
@@ -51,7 +56,7 @@ export function LoginForm() {
     >
       <div>
         <label htmlFor="login-email" className="block text-sm font-medium text-white mb-1">
-          Email
+          {t("loginForm.emailLabel")}
         </label>
         <input
           id="login-email"
@@ -59,7 +64,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputBase}
-          placeholder="you@example.com"
+          placeholder={t("loginForm.emailPlaceholder")}
           required
           autoComplete="email"
           disabled={status === "loading"}
@@ -67,7 +72,7 @@ export function LoginForm() {
       </div>
       <div>
         <label htmlFor="login-password" className="block text-sm font-medium text-white mb-1">
-          Password
+          {t("loginForm.passwordLabel")}
         </label>
         <input
           id="login-password"
@@ -75,7 +80,7 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className={inputBase}
-          placeholder="••••••••"
+          placeholder={t("loginForm.passwordPlaceholder")}
           required
           autoComplete="current-password"
           disabled={status === "loading"}
@@ -96,13 +101,16 @@ export function LoginForm() {
         disabled={status === "loading"}
         className="btn-common-styles btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {status === "loading" ? "Signing in…" : "Sign in"}
+        {status === "loading" ? t("loginForm.submitting") : t("loginForm.submit")}
       </button>
 
       <p className="text-sm text-white/80">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="underline hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded">
-          Register
+        {t("loginForm.noAccount")}{" "}
+        <Link
+          href={`${prefix}/register`}
+          className="underline hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded"
+        >
+          {t("loginForm.registerLink")}
         </Link>
       </p>
     </form>
